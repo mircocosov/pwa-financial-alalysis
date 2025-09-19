@@ -112,3 +112,10 @@ class InvestmentHistoryView(APIView):
             "max_growth": max_growth,
             "current_value": current_value
         })
+
+
+# 8. DELETE /api/transactions/<int:pk>/
+class TransactionDeleteView(generics.DestroyAPIView):
+    queryset = Transaction.objects.all()
+    serializer_class = TransactionSerializer
+    lookup_field = 'pk'
