@@ -1,0 +1,46 @@
+.container {
+	position: relative;
+}
+
+.svg {
+	display: block;
+}
+
+.gridLine {
+	stroke: #444;
+	stroke-dasharray: 2, 2;
+}
+
+.chartPath {
+	fill: none;
+	stroke: #ffd700;
+	stroke-width: 2;
+}
+
+.point {
+	fill: #ffd700;
+	cursor: pointer;
+}
+
+.xLabel {
+	font-size: 12px;
+	fill: #ccc;
+	text-anchor: middle;
+}
+
+.yLabel {
+	font-size: 12px;
+	fill: #ccc;
+	text-anchor: end;
+}
+
+.tooltip {
+	position: absolute;
+	background-color: #333;
+	color: #fff;
+	padding: 5px 8px;
+	border-radius: 4px;
+	font-size: 12px;
+	pointer-events: none;
+	white-space: nowrap;
+}

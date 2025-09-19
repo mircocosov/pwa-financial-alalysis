@@ -1,0 +1,23 @@
+// colors
+
+$black: #111111;
+$grey-1: #333333;
+$grey-2: #7d7d7d;
+$red: #ff6b6b;
+$yellow: #ffe066;
+$green: #6bcb77;
+$white: #f2f2f2;
+
+// fonts
+
+@mixin p {
+	font-family: "Roboto";
+}
+
+@mixin heading-1 {
+	font-family: "Roboto";
+}
+
+@mixin heading-2 {
+	font-family: "Roboto";
+}
