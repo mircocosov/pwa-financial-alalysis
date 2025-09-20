@@ -1,46 +1,78 @@
+@import '@/assets/css/config.scss';
+
 .container {
-	position: relative;
+  position: relative;
+  border-radius: $radius;
+  background: $grey-1;
 }
 
 .svg {
-	display: block;
+  display: block;
 }
 
 .gridLine {
-	stroke: #444;
-	stroke-dasharray: 2, 2;
+  stroke: $grey-1;
+  stroke-dasharray: 2, 2;
+  stroke-width: 0.5;
 }
 
 .chartPath {
-	fill: none;
-	stroke: #ffd700;
-	stroke-width: 2;
+  fill: none;
+  stroke: $yellow;
+  stroke-width: 2;
 }
 
 .point {
-	fill: #ffd700;
-	cursor: pointer;
+  fill: $yellow;
+  cursor: pointer;
 }
 
 .xLabel {
-	font-size: 12px;
-	fill: #ccc;
-	text-anchor: middle;
+  font-size: 12px;
+  fill: $grey-2;
+  text-anchor: middle;
+  font-family: 'IBMPlexSans';
 }
 
 .yLabel {
-	font-size: 12px;
-	fill: #ccc;
-	text-anchor: end;
+  font-size: 12px;
+  fill: $grey-2;
+  text-anchor: end;
+  font-family: 'IBMPlexSans';
 }
 
 .tooltip {
-	position: absolute;
-	background-color: #333;
-	color: #fff;
-	padding: 5px 8px;
-	border-radius: 4px;
-	font-size: 12px;
-	pointer-events: none;
-	white-space: nowrap;
+  position: absolute;
+  background-color: $grey-1;
+  color: $white;
+  padding: 5px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  pointer-events: none;
+  white-space: nowrap;
+  z-index: 10;
+  font-family: 'IBMPlexSans';
+}
+
+/* Желтые вертикальные пунктирные линии */
+.yellowVerticalLine {
+  stroke: $yellow-dark;
+  stroke-width: 0.5;
+  stroke-dasharray: 2, 2;
+  stroke-opacity: 0.8;
+}
+
+/* Желтые горизонтальные пунктирные линии */
+.yellowHorizontalLine {
+  stroke: $yellow-dark;
+  stroke-width: 0.5;
+  stroke-dasharray: 2, 2;
+  stroke-opacity: 0.8;
+}
+
+/* Белая линия при наведении */
+.whiteLine {
+  stroke: $white;
+  stroke-width: 1;
+  stroke-opacity: 0.9;
 }
