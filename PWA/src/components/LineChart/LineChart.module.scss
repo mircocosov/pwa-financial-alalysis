@@ -1,0 +1,89 @@
+@import '@/assets/css/config.scss';
+
+.container {
+  position: relative;
+  border-radius: $radius;
+  background: $grey-1;
+
+  width: 100%;
+  max-width: 900px; /* Максимальная ширина для больших экранов */
+  height: 0;
+  padding-bottom: 50%; /* Соотношение сторон 2:1 */
+  margin: 0 auto;
+  box-sizing: border-box;
+  overflow: visible; /* Чтобы тултип не обрезался */
+}
+
+.svg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.gridLine {
+  stroke: $grey-1;
+  stroke-dasharray: 2, 2;
+  stroke-width: 0.5;
+}
+
+.chartPath {
+  fill: none;
+  stroke: $yellow;
+  stroke-width: 2;
+}
+
+.point {
+  fill: $yellow;
+  cursor: pointer;
+}
+
+.xLabel {
+  font-size: 12px;
+  fill: $grey-2;
+  text-anchor: middle;
+  font-family: 'IBMPlexSans';
+}
+
+.yLabel {
+  font-size: 12px;
+  fill: $grey-2;
+  text-anchor: end;
+  font-family: 'IBMPlexSans';
+}
+
+.tooltip {
+  position: absolute;
+  background-color: $grey-1;
+  color: $white;
+  padding: 5px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  pointer-events: none;
+  white-space: nowrap;
+  z-index: 10;
+  font-family: 'IBMPlexSans';
+  user-select: none;
+}
+
+.yellowVerticalLine {
+  stroke: $yellow-dark;
+  stroke-width: 0.5;
+  stroke-dasharray: 2, 2;
+  stroke-opacity: 0.8;
+}
+
+.yellowHorizontalLine {
+  stroke: $yellow-dark;
+  stroke-width: 0.5;
+  stroke-dasharray: 2, 2;
+  stroke-opacity: 0.8;
+}
+
+.whiteLine {
+  stroke: $white;
+  stroke-width: 1;
+  stroke-opacity: 0.9;
+}
