@@ -41,7 +41,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',
     'corsheaders',
-    'api'
+    'api',
 ]
 
 REST_FRAMEWORK = {
@@ -132,3 +132,5 @@ STATIC_URL = 'static/'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 CORS_ALLOW_ALL_ORIGINS = True
+
+TINKOFF_TOKEN = 't.lk4gD_WyoDgjm88ccMO51UrsW2GQ68Ji33pYKbiPVytCM-lZhbCfdTq-dFP1rycitxXjLQII-4gu0g7quBX0jw'

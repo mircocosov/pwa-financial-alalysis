@@ -6,12 +6,12 @@ from .views import (
 )
 
 urlpatterns = [
-    path('api/transactions/', TransactionCreateView.as_view(), name='transaction-create'),
-    path('api/transactions/list/', TransactionListView.as_view(), name='transaction-list'),
-    path('api/transactions/latest/', LatestTransactionsView.as_view(), name='latest-transactions'),
-    path('api/transactions/<int:pk>/', TransactionDeleteView.as_view(), name='transaction-delete'),
-    path('api/summary/', SummaryView.as_view(), name='summary'),
-    path('api/investments/summary/', InvestmentSummaryView.as_view(), name='investment-summary'),
-    path('api/investments/prices/', InvestmentPricesView.as_view(), name='investment-prices'),
-    path('api/investments/history/', InvestmentHistoryView.as_view(), name='investment-history'),
+    path('transactions/', TransactionCreateView.as_view(), name='transaction-create'),
+    path('transactions/list/', TransactionListView.as_view(), name='transaction-list'),
+    path('transactions/latest/', LatestTransactionsView.as_view(), name='latest-transactions'),
+    path('transactions/<int:pk>/', TransactionDeleteView.as_view(), name='transaction-delete'),
+    path('summary/', SummaryView.as_view(), name='summary'),
+    path('investments/summary/', InvestmentSummaryView.as_view(), name='investment-summary'),
+    path('investments/prices/', InvestmentPricesView.as_view(), name='investment-prices'),
+    path('investments/history/', InvestmentHistoryView.as_view(), name='investment-history'),
 ]
