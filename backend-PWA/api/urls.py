@@ -14,4 +14,5 @@ urlpatterns = [
     path('investments/summary/', InvestmentSummaryView.as_view(), name='investment-summary'),
     path('investments/prices/', InvestmentPricesView.as_view(), name='investment-prices'),
     path('investments/history/', InvestmentHistoryView.as_view(), name='investment-history'),
+    path("api/t-invest/", include("t-invest.urls")),
 ]
