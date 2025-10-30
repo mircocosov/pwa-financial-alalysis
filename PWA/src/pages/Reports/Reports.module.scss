@@ -1,0 +1,122 @@
+@import '../../styles/config.scss';
+
+.root {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  padding: 2.5rem 3rem;
+  color: $text-primary;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.sections {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.5rem;
+}
+
+.panel {
+  flex: 1 1 360px;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+}
+
+.listItem {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.barTrack {
+  display: flex;
+  align-items: center;
+  height: 10px;
+  border-radius: 999px;
+  background: $surface;
+  overflow: hidden;
+}
+
+.barFill {
+  height: 100%;
+  border-radius: 999px;
+  background: $primary;
+}
+
+.muted {
+  font-size: 0.9rem;
+  color: $text-subtle;
+}
+
+.compareRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.twoColumn {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.twoColumn > div {
+  flex: 1 1 160px;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.timeline {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.timelineItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 0.75rem;
+}
+
+.tagRow {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.35rem 0.75rem;
+  border-radius: 999px;
+  background: $surface-soft;
+  color: $primary;
+  font-size: 0.8rem;
+}
+
+.incomeValue {
+  color: $success;
+}
+
+.expenseValue {
+  color: $error;
+}
+
+@media (max-width: 900px) {
+  .root {
+    padding: 2rem 1.75rem 3rem;
+  }
+}
+

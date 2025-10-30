@@ -1,0 +1,31 @@
+@import './styles/config.scss';
+@import url('https://fonts.googleapis.com/css?family=IBM+Plex+Sans:400,500&display=swap');
+
+html, body, #root {
+  height: 100%;
+}
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: $background;
+  color: $text-primary;
+  font-family: 'IBM Plex Sans', Arial, sans-serif;
+  font-size: 16px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+*, *:before, *:after {
+  box-sizing: border-box;
+}
+a {
+  color: $primary;
+  text-decoration: none;
+  &:hover {
+    text-decoration: underline;
+  }
+}
+h1, h2, h3, h4 {
+  font-family: inherit;
+  color: $primary;
+}
+

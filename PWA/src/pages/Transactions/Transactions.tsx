@@ -1,137 +1,202 @@
-const ledger = [
-  {
-    id: 'inv-2045',
-    description: 'Enterprise onboarding services',
-    category: 'Revenue',
-    amount: 72000,
-    direction: 'income',
-    date: '15 Dec 2024',
-    status: 'Settled',
-  },
-  {
-    id: 'exp-8821',
-    description: 'Cloud infrastructure (November)',
-    category: 'Operations',
-    amount: -48200,
-    direction: 'expense',
-    date: '14 Dec 2024',
-    status: 'Paid',
-  },
-  {
-    id: 'exp-8812',
-    description: 'Performance marketing bonus',
-    category: 'Payroll',
-    amount: -18500,
-    direction: 'expense',
-    date: '13 Dec 2024',
-    status: 'Pending approval',
-  },
-  {
-    id: 'inv-2044',
-    description: 'Quarterly subscription renewal',
-    category: 'Revenue',
-    amount: 125000,
-    direction: 'income',
-    date: '10 Dec 2024',
-    status: 'Settled',
-  },
-  {
-    id: 'exp-8792',
-    description: 'Data enrichment vendor fee',
-    category: 'Vendors',
-    amount: -22600,
-    direction: 'expense',
-    date: '09 Dec 2024',
-    status: 'Scheduled',
-  },
-]
+import React, { useMemo, useState } from "react";
+import styles from "./Transactions.module.scss";
+import { Card } from "../../components/Card";
+import { Button } from "../../components/Button";
+import { Input } from "../../components/Input";
+import { AddTransactionModal } from "../../components/AddTransactionModal";
+import type { TransactionForm } from "../../components/AddTransactionModal";
 
-const statusTone: Record<string, string> = {
-  Settled: 'text-emerald-300 bg-emerald-300/10 border-emerald-300/30',
-  Paid: 'text-sky-300 bg-sky-300/10 border-sky-300/30',
-  'Pending approval': 'text-amber-200 bg-amber-200/10 border-amber-200/40',
-  Scheduled: 'text-white/70 bg-white/10 border-white/15',
-}
+type Tx = {
+  id: string;
+  description: string;
+  category: string;
+  amount: number;
+  type: "income" | "expense";
+  date: string;
+};
 
-const currency = new Intl.NumberFormat('ru-RU', {
-  style: 'currency',
-  currency: 'RUB',
-  maximumFractionDigits: 0,
-})
+const initialTransactions: Tx[] = [
+  { id: "1", description: "Зарплата", category: "Доход", amount: 95_400, type: "income", date: "2024-12-15" },
+  { id: "2", description: "Продукты", category: "Быт", amount: 3_200, type: "expense", date: "2024-12-14" },
+  { id: "3", description: "Такси", category: "Транспорт", amount: 1_250, type: "expense", date: "2024-12-13" },
+  { id: "4", description: "Бонус", category: "Доход", amount: 25_000, type: "income", date: "2024-12-12" },
+  { id: "5", description: "Офис", category: "Операционные", amount: 5_600, type: "expense", date: "2024-12-10" },
+];
 
-export default function Transactions() {
+const scheduled = [
+  { title: "Аренда", due: "01 янв", amount: "-65 000 ₽" },
+  { title: "Инвестиции", due: "05 янв", amount: "-20 000 ₽" },
+  { title: "Зарплата", due: "28 дек", amount: "+95 400 ₽" },
+];
+
+const categories = [
+  { title: "Питание", value: 18 },
+  { title: "Транспорт", value: 12 },
+  { title: "Шопинг", value: 22 },
+  { title: "Образ жизни", value: 16 },
+];
+
+const dateFormatter = new Intl.DateTimeFormat("ru-RU", { day: "2-digit", month: "short" });
+
+const Transactions: React.FC = () => {
+  const [items, setItems] = useState(initialTransactions);
+  const [typeFilter, setTypeFilter] = useState<"all" | "income" | "expense">("all");
+  const [query, setQuery] = useState("");
+  const [modalOpen, setModalOpen] = useState(false);
+
+  const filtered = useMemo(() => {
+    return items.filter((item) => {
+      if (typeFilter !== "all" && item.type !== typeFilter) return false;
+      if (query && !`${item.description} ${item.category}`.toLowerCase().includes(query.toLowerCase())) return false;
+      return true;
+    });
+  }, [items, typeFilter, query]);
+
+  const totals = useMemo(() => {
+    const base = { income: 0, expense: 0 };
+    filtered.forEach((item) => {
+      if (item.type === "income") base.income += item.amount;
+      if (item.type === "expense") base.expense += item.amount;
+    });
+    return base;
+  }, [filtered]);
+
+  const handleSubmit = (form: TransactionForm) => {
+    const storedDate = form.date || new Date().toISOString();
+    const next: Tx = {
+      id: String(Date.now()),
+      description: form.description || "Новая операция",
+      category: form.category,
+      amount: form.amount,
+      type: form.type,
+      date: storedDate,
+    };
+    setItems((current) => [next, ...current]);
+  };
+
   return (
-    <div className="space-y-10">
-      <section className="relative overflow-hidden rounded-[32px] border border-white/10 bg-white/[0.02] p-8 shadow-[0_45px_160px_rgba(4,6,13,0.5)]">
-        <span className="pointer-events-none absolute inset-x-0 top-0 h-36 bg-[radial-gradient(circle_at_top,_rgba(255,255,255,0.12),_transparent_70%)]" />
-        <header className="relative flex flex-wrap items-end justify-between gap-4">
-          <div className="space-y-3">
-            <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-[11px] uppercase tracking-[0.35em] text-white/50">
-              Transactions
-              <span className="ml-1 h-1.5 w-1.5 rounded-full bg-yellow-400 shadow-[0_0_8px_rgba(250,204,21,0.6)]" />
-            </div>
-            <h2 className="text-3xl font-semibold text-white">Ledger detail</h2>
-            <p className="max-w-2xl text-sm text-white/60">
-              Filter revenue, vendor payouts, or payroll to investigate live balances and reconcile
-              exports before close.
-            </p>
-          </div>
-          <button
-            type="button"
-            className="inline-flex h-11 items-center justify-center gap-2 rounded-xl border border-white/15 px-4 text-sm text-white/75 transition hover:border-yellow-200/40 hover:text-white"
-          >
-            <span className="text-lg leading-none">⇩</span>
-            Export CSV
-          </button>
-        </header>
-
-        <div className="relative mt-6 overflow-hidden rounded-[28px] border border-white/10 bg-white/5 shadow-[0_30px_110px_rgba(4,6,13,0.45)]">
-          <table className="min-w-full text-sm text-white/75">
-            <thead className="bg-white/[0.08] text-xs uppercase tracking-[0.28em] text-white/40">
-              <tr>
-                <th className="px-6 py-4 text-left font-medium">ID</th>
-                <th className="px-6 py-4 text-left font-medium">Description</th>
-                <th className="px-6 py-4 text-left font-medium">Category</th>
-                <th className="px-6 py-4 text-left font-medium">Amount</th>
-                <th className="px-6 py-4 text-left font-medium">Date</th>
-                <th className="px-6 py-4 text-left font-medium">Status</th>
-              </tr>
-            </thead>
-            <tbody>
-              {ledger.map((entry, index) => {
-                const amountDisplay = currency.format(entry.amount)
-                const directionClass =
-                  entry.direction === 'income' ? 'text-emerald-300' : 'text-rose-300'
-
-                return (
-                  <tr
-                    key={entry.id}
-                    className={`transition ${
-                      index % 2 === 0 ? 'bg-white/[0.04]' : 'bg-white/[0.06]'
-                    } hover:bg-white/[0.08]`}
-                  >
-                    <td className="px-6 py-4 font-medium text-white">{entry.id}</td>
-                    <td className="px-6 py-4">{entry.description}</td>
-                    <td className="px-6 py-4 text-white/65">{entry.category}</td>
-                    <td className={`px-6 py-4 font-semibold ${directionClass}`}>
-                      {entry.direction === 'income' ? '+' : '-'}
-                      {amountDisplay.replace(/[-+]/g, '')}
-                    </td>
-                    <td className="px-6 py-4 text-white/65">{entry.date}</td>
-                    <td className="px-6 py-4">
-                      <span
-                        className={`inline-flex items-center rounded-full border px-3 py-1 text-xs font-medium backdrop-blur ${statusTone[entry.status]}`}
-                      >
-                        {entry.status}
-                      </span>
-                    </td>
-                  </tr>
-                )
-              })}
-            </tbody>
-          </table>
+    <div className={styles.root}>
+      <div className={styles.header}>
+        <h1>Транзакции</h1>
+        <div className={styles.controls}>
+          <Button variant="secondary" size="sm" onClick={() => setModalOpen(true)}>Добавить транзакцию</Button>
         </div>
-      </section>
+      </div>
+
+      <Card>
+        <div className={styles.toolbar}>
+          <Input
+            placeholder="Поиск по описанию или категории"
+            value={query}
+            onChange={(event) => setQuery(event.target.value)}
+            style={{ maxWidth: 260 }}
+          />
+          <Button size="sm" variant={typeFilter === "all" ? "primary" : "secondary"} onClick={() => setTypeFilter("all")}>
+            Все
+          </Button>
+          <Button size="sm" variant={typeFilter === "income" ? "primary" : "secondary"} onClick={() => setTypeFilter("income")}>
+            Доходы
+          </Button>
+          <Button size="sm" variant={typeFilter === "expense" ? "primary" : "secondary"} onClick={() => setTypeFilter("expense")}>
+            Расходы
+          </Button>
+        </div>
+      </Card>
+
+      <div className={styles.contentRow}>
+        <div className={styles.mainColumn}>
+          <Card>
+            <div className={styles.tableWrap}>
+              <table className={styles.table}>
+                <thead>
+                  <tr>
+                    <th>Описание</th>
+                    <th>Категория</th>
+                    <th>Дата</th>
+                    <th className={styles.textRight}>Сумма</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {filtered.map((item) => (
+                    <tr key={item.id}>
+                      <td>{item.description}</td>
+                      <td>{item.category}</td>
+                      <td>{item.date ? dateFormatter.format(new Date(item.date)) : ""}</td>
+                      <td className={`${styles.textRight} ${item.type === "income" ? styles.income : styles.expense}`}>
+                        {item.type === "income" ? "+" : "-"}
+                        {item.amount.toLocaleString("ru-RU")} ₽
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </Card>
+
+          <Card>
+            <h3>Итоги</h3>
+            <div className={styles.list}>
+              <div className={styles.listItem}>
+                <span>Доходы</span>
+                <strong className={styles.income}>{totals.income.toLocaleString("ru-RU")} ₽</strong>
+              </div>
+              <div className={styles.listItem}>
+                <span>Расходы</span>
+                <strong className={styles.expense}>{totals.expense.toLocaleString("ru-RU")} ₽</strong>
+              </div>
+              <div className={styles.listItem}>
+                <span>Чистый поток</span>
+                <strong>{(totals.income - totals.expense).toLocaleString("ru-RU")} ₽</strong>
+              </div>
+            </div>
+          </Card>
+        </div>
+
+        <div className={styles.sideColumn}>
+          <Card>
+            <h3>Запланировано</h3>
+            <div className={styles.list}>
+              {scheduled.map((item) => (
+                <div key={item.title} className={styles.listItem}>
+                  <div>
+                    <strong>{item.title}</strong>
+                    <div className={styles.muted}>{item.due}</div>
+                  </div>
+                  <span>{item.amount}</span>
+                </div>
+              ))}
+            </div>
+          </Card>
+
+          <Card>
+            <h3>Расходы по категориям</h3>
+            <div className={styles.list}>
+              {categories.map((item) => (
+                <div key={item.title}>
+                  <div className={styles.listItem}>
+                    <span>{item.title}</span>
+                    <span>{item.value}%</span>
+                  </div>
+                  <div className={styles.progressTrack}>
+                    <span className={styles.progressValue} style={{ width: `${item.value}%` }} />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </Card>
+        </div>
+      </div>
+
+      <AddTransactionModal
+        open={modalOpen}
+        onClose={() => setModalOpen(false)}
+        onSubmit={(form) => {
+          handleSubmit(form);
+          setModalOpen(false);
+        }}
+      />
     </div>
-  )
-}
+  );
+};
+
+export default Transactions;

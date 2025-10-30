@@ -1,124 +1,172 @@
-const allocations = [
-  { id: 'core', label: 'Core revenue streams', value: '₽1,420,000', share: 46, tone: 'emerald' },
-  { id: 'growth', label: 'Growth bets', value: '₽780,000', share: 25, tone: 'sky' },
-  { id: 'stabilisation', label: 'Stabilisation budget', value: '₽540,000', share: 18, tone: 'amber' },
-  { id: 'experiments', label: 'Experiments', value: '₽340,000', share: 11, tone: 'rose' },
-]
+import React, { useMemo } from "react";
+import styles from "./Portfolio.module.scss";
+import { Card } from "../../components/Card";
+import { Button } from "../../components/Button";
 
-const scenarios = [
-  { label: 'Base case', burn: '₽380K / month', note: 'Runway 11.4 months', tone: 'emerald' },
-  { label: 'Accelerated growth', burn: '₽450K / month', note: 'Runway 9.1 months', tone: 'amber' },
-  { label: 'Stress scenario', burn: '₽520K / month', note: 'Runway 7.6 months', tone: 'rose' },
-]
+const holdings = [
+  { symbol: "AAPL", name: "Apple", shares: 150, price: 175.23, change: 2.34, value: 26284.5, allocation: 25.2 },
+  { symbol: "GOOGL", name: "Alphabet", shares: 75, price: 138.45, change: -1.12, value: 10383.75, allocation: 15.8 },
+  { symbol: "MSFT", name: "Microsoft", shares: 100, price: 334.78, change: 0.89, value: 33478, allocation: 32.1 },
+  { symbol: "TSLA", name: "Tesla", shares: 50, price: 248.92, change: 5.67, value: 12446, allocation: 11.9 },
+  { symbol: "AMZN", name: "Amazon", shares: 25, price: 142.33, change: -0.45, value: 3558.25, allocation: 3.4 },
+  { symbol: "NVDA", name: "NVIDIA", shares: 40, price: 456.78, change: 3.21, value: 18271.2, allocation: 17.5 },
+];
 
-const toneGradient: Record<string, string> = {
-  emerald: 'from-emerald-300/55 via-emerald-400/30 to-transparent',
-  sky: 'from-sky-300/55 via-sky-400/30 to-transparent',
-  amber: 'from-amber-300/55 via-amber-400/30 to-transparent',
-  rose: 'from-rose-300/55 via-rose-400/30 to-transparent',
-}
+const tags = [
+  { label: "Рост", value: 46 },
+  { label: "Стоимость", value: 32 },
+  { label: "Дивиденды", value: 22 },
+];
 
-export default function Portfolio() {
+const usdFormatter = new Intl.NumberFormat("ru-RU", { style: "currency", currency: "USD", maximumFractionDigits: 2 });
+
+const Portfolio: React.FC = () => {
+  const totalValue = useMemo(() => holdings.reduce((sum, item) => sum + item.value, 0), []);
+
   return (
-    <div className="space-y-12">
-      <section className="relative overflow-hidden rounded-[32px] border border-white/10 bg-white/[0.02] p-8 shadow-[0_45px_160px_rgba(4,6,13,0.5)]">
-        <span className="pointer-events-none absolute inset-x-0 top-0 h-32 bg-[radial-gradient(circle_at_top,_rgba(255,255,255,0.14),_transparent_72%)] opacity-80" />
-        <header className="relative flex flex-wrap items-end justify-between gap-4">
-          <div className="space-y-3">
-            <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-[11px] uppercase tracking-[0.35em] text-white/50">
-              Portfolio
-              <span className="ml-1 h-1.5 w-1.5 rounded-full bg-sky-400 shadow-[0_0_8px_rgba(56,189,248,0.65)]" />
-            </div>
-            <h2 className="text-3xl font-semibold text-white">Capital allocation overview</h2>
-            <p className="max-w-2xl text-sm leading-relaxed text-white/60">
-              Align strategic investment buckets with short-term liquidity needs. Balance innovation
-              initiatives with predictable revenue streams to keep the roadmap funded.
-            </p>
-          </div>
-          <div className="rounded-2xl border border-white/10 bg-black/30 px-4 py-4 text-xs text-white/60 shadow-[0_18px_45px_rgba(4,6,13,0.4)]">
-            Last rebalance{' '}
-            <span className="font-semibold tracking-wide text-white">05 December 2024</span>
-            <p className="mt-1 text-[11px] text-white/45">Next review scheduled in 9 days</p>
-          </div>
-        </header>
-
-        <div className="relative mt-8 grid gap-5 lg:grid-cols-2">
-          {allocations.map((item) => (
-            <article
-              key={item.id}
-              className="group relative overflow-hidden rounded-[28px] border border-white/10 bg-white/[0.035] p-6 transition duration-300 hover:-translate-y-1 hover:border-white/25"
-            >
-              <span
-                className={`pointer-events-none absolute inset-x-0 bottom-[-20%] h-1/2 bg-gradient-to-t ${toneGradient[item.tone]} blur-[100px] opacity-70 transition duration-300 group-hover:opacity-90`}
-              />
-              <div className="relative">
-                <p className="text-xs uppercase tracking-[0.3em] text-white/45">{item.label}</p>
-                <p className="mt-4 text-2xl font-semibold text-white drop-shadow-[0_16px_35px_rgba(255,255,255,0.15)]">
-                  {item.value}
-                </p>
-                <p className="mt-2 text-sm text-white/60">{item.share}% allocation</p>
-                <div className="mt-4 h-2 w-full rounded-full bg-white/10">
-                  <div
-                    className="h-full rounded-full bg-gradient-to-r from-yellow-300 via-yellow-400 to-amber-400 transition-[width]"
-                    style={{ width: `${item.share}%` }}
-                  />
-                </div>
-              </div>
-            </article>
-          ))}
+    <div className={styles.root}>
+      <div className={styles.header}>
+        <h1>Портфель</h1>
+        <div className={styles.actions}>
+          <Button variant="secondary" size="sm">Фильтр</Button>
+          <Button size="sm">Добавить актив</Button>
         </div>
-      </section>
+      </div>
 
-      <section className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_320px]">
-        <div className="rounded-[32px] border border-white/10 bg-white/[0.02] p-6 sm:p-8 shadow-[0_38px_120px_rgba(4,6,13,0.45)]">
-          <h3 className="text-lg font-semibold text-white">Scenario outlook</h3>
-          <p className="mt-2 text-sm text-white/60">
-            Expected burn under three scenarios with a 6‑month projection horizon.
-          </p>
-
-          <div className="mt-6 grid gap-4 sm:grid-cols-3">
-            {scenarios.map((scenario) => (
-              <div
-                key={scenario.label}
-                className="relative overflow-hidden rounded-2xl border border-white/10 bg-white/5 p-4 text-sm text-white/80 transition hover:border-white/20"
-              >
-                <span
-                  className={`pointer-events-none absolute inset-0 bg-gradient-to-br ${toneGradient[scenario.tone]} opacity-60 blur-[120px]`}
-                />
-                <div className="relative">
-                  <p className="text-xs uppercase tracking-[0.25em] text-white/45">
-                    {scenario.label}
-                  </p>
-                  <p className="mt-3 text-lg font-semibold text-white">{scenario.burn}</p>
-                  <p className="mt-1 text-xs text-white/55">{scenario.note}</p>
-                </div>
-              </div>
-            ))}
-          </div>
+      <div className={styles.sectionStack}>
+        <div className={styles.summaryRow}>
+          <Card className={styles.summaryCard}>
+            <span>Итоговая стоимость</span>
+            <strong className={styles.summaryValue}>{usdFormatter.format(totalValue)}</strong>
+            <span className={styles.muted}>Обновлено несколько секунд назад</span>
+          </Card>
+          <Card className={styles.summaryCard}>
+            <span>Изменение за день</span>
+            <strong className={styles.gain}>+1 540 ₽</strong>
+            <span className={styles.muted}>+0,54% к предыдущей сессии</span>
+          </Card>
+          <Card className={styles.summaryCard}>
+            <span>Лидер роста</span>
+            <strong>TSLA</strong>
+            <span className={styles.gain}>+5,67%</span>
+          </Card>
+          <Card className={styles.summaryCard}>
+            <span>Список наблюдения</span>
+            <strong>6 активов</strong>
+            <span className={styles.muted}>3 сигнала на покупку</span>
+          </Card>
         </div>
 
-        <aside className="rounded-[32px] border border-white/10 bg-gradient-to-br from-yellow-300/15 via-yellow-400/10 to-transparent p-6 shadow-[0_30px_100px_rgba(253,224,71,0.25)]">
-          <h3 className="text-lg font-semibold text-white">Allocation guidance</h3>
-          <ul className="mt-4 space-y-3 text-sm text-white/80">
-            <li className="rounded-2xl border border-emerald-300/40 bg-emerald-300/10 px-4 py-3">
-              Keep ≥45% of cash in core revenue streams to stabilise working capital.
-            </li>
-            <li className="rounded-2xl border border-sky-300/40 bg-sky-300/10 px-4 py-3">
-              Allocate up to 25% to growth bets with monthly performance reviews.
-            </li>
-            <li className="rounded-2xl border border-rose-300/40 bg-rose-300/10 px-4 py-3">
-              Maintain at least 2 months of payroll and vendor runway in quick-access reserves.
-            </li>
-          </ul>
-
-          <div className="mt-5 rounded-2xl border border-white/10 bg-white/5 px-4 py-4 text-xs text-white/65 backdrop-blur">
-            <p className="font-medium text-white">Tip</p>
-            <p className="mt-1">
-              Use scenario templates to stress-test liquidity against product roadmap milestones.
-            </p>
+        <Card>
+          <div className={styles.tableWrap}>
+            <h3>Структура портфеля</h3>
+            <table className={styles.table}>
+              <thead>
+                <tr>
+                  <th>Тикер</th>
+                  <th>Компания</th>
+                  <th className={styles.textRight}>Кол-во</th>
+                  <th className={styles.textRight}>Цена</th>
+                  <th className={styles.textRight}>Изм.</th>
+                  <th className={styles.textRight}>Стоимость</th>
+                  <th className={styles.textRight}>Доля</th>
+                </tr>
+              </thead>
+              <tbody>
+                {holdings.map((item) => (
+                  <tr key={item.symbol}>
+                    <td>{item.symbol}</td>
+                    <td>{item.name}</td>
+                    <td className={styles.textRight}>{item.shares}</td>
+                    <td className={styles.textRight}>{usdFormatter.format(item.price)}</td>
+                    <td className={`${styles.textRight} ${item.change >= 0 ? styles.gain : styles.loss}`}>
+                      {item.change >= 0 ? "+" : ""}{item.change.toFixed(2)}%
+                    </td>
+                    <td className={styles.textRight}>{usdFormatter.format(item.value)}</td>
+                    <td className={styles.textRight}>{item.allocation.toFixed(1)}%</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
-        </aside>
-      </section>
+        </Card>
+
+        <div className={styles.flexSplit}>
+          <div className={styles.column}>
+            <Card>
+              <h3>Лидеры движения</h3>
+              {holdings
+                .filter((item) => item.change > 0)
+                .slice()
+                .sort((a, b) => b.change - a.change)
+                .slice(0, 3)
+                .map((item) => (
+                  <div key={item.symbol} className={styles.listItem}>
+                    <div>
+                      <strong>{item.symbol}</strong>
+                      <div className={styles.muted}>{item.name}</div>
+                    </div>
+                    <div className={styles.textRight}>
+                      <div className={styles.gain}>+{item.change.toFixed(2)}%</div>
+                      <div className={styles.muted}>{usdFormatter.format(item.price)}</div>
+                    </div>
+                  </div>
+                ))}
+            </Card>
+
+            <Card>
+              <h3>Тематические корзины</h3>
+              {tags.map((tag) => (
+                <div key={tag.label} className={styles.listItem}>
+                  <div>{tag.label}</div>
+                  <div>{tag.value}%</div>
+                </div>
+              ))}
+            </Card>
+          </div>
+
+          <div className={styles.column}>
+            <Card>
+              <h3>Крупнейшие позиции</h3>
+              {holdings
+                .slice()
+                .sort((a, b) => b.value - a.value)
+                .slice(0, 3)
+                .map((item) => (
+                  <div key={item.symbol} className={styles.listItem}>
+                    <div>
+                      <strong>{item.symbol}</strong>
+                      <div className={styles.muted}>{item.name}</div>
+                    </div>
+                    <div className={styles.textRight}>
+                      <div>{item.allocation.toFixed(1)}%</div>
+                      <div className={styles.muted}>{usdFormatter.format(item.value)}</div>
+                    </div>
+                  </div>
+                ))}
+            </Card>
+
+            <Card>
+              <h3>Предложения по ребалансировке</h3>
+              <div className={styles.listItem}>
+                <span>Снизить долю техсектора</span>
+                <span>-2,5%</span>
+              </div>
+              <div className={styles.listItem}>
+                <span>Увеличить облигации</span>
+                <span>+1,8%</span>
+              </div>
+              <div className={styles.listItem}>
+                <span>Пополнить кэш-позицию</span>
+                <span>+0,7%</span>
+              </div>
+            </Card>
+          </div>
+        </div>
+      </div>
     </div>
-  )
-}
+  );
+};
+
+export default Portfolio;
+

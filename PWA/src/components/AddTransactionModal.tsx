@@ -1,172 +1,124 @@
-import { useEffect, useState } from 'react'
+import React, { useState } from "react";
+import styles from "./AddTransactionModal.module.scss";
+import { Button } from "./Button";
+import { Input } from "./Input";
 
-type TransactionFormState = {
-  type: 'income' | 'expense'
-  amount: number
-  category: string
-  description: string
-  date: string
-}
+export type TransactionForm = {
+  type: "income" | "expense";
+  category: string;
+  amount: number;
+  description: string;
+  date: string;
+};
 
-type AddTransactionModalProps = {
-  isOpen: boolean
-  onClose: () => void
-  onSubmit: (transaction: TransactionFormState) => void
-}
+export const AddTransactionModal: React.FC<{
+  open: boolean;
+  onClose: () => void;
+  onSubmit: (tx: TransactionForm) => void;
+}> = ({ open, onClose, onSubmit }) => {
+  const [type, setType] = useState<TransactionForm["type"]>("expense");
+  const [category, setCategory] = useState("");
+  const [amount, setAmount] = useState("");
+  const [description, setDescription] = useState("");
+  const [date, setDate] = useState<string>(new Date().toISOString().slice(0, 10));
 
-const defaultState: TransactionFormState = {
-  type: 'expense',
-  amount: 0,
-  category: 'general',
-  description: '',
-  date: new Date().toISOString().slice(0, 10),
-}
+  if (!open) return null;
 
-export function AddTransactionModal({ isOpen, onClose, onSubmit }: AddTransactionModalProps) {
-  const [form, setForm] = useState<TransactionFormState>(defaultState)
-
-  useEffect(() => {
-    if (isOpen) {
-      setForm(defaultState)
-    }
-  }, [isOpen])
-
-  if (!isOpen) {
-    return null
-  }
+  const handleSubmit = (event: React.FormEvent) => {
+    event.preventDefault();
+    const value = parseFloat(amount);
+    if (Number.isNaN(value)) return;
+    onSubmit({ type, category, amount: value, description, date });
+    onClose();
+  };
 
   return (
-    <div
-      role="dialog"
-      aria-modal="true"
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/65 backdrop-blur-xl"
-    >
-      <div className="relative w-full max-w-xl overflow-hidden rounded-[32px] border border-white/10 bg-[#0C1020]/95 p-6 shadow-[0_50px_140px_rgba(0,0,0,0.55)]">
-        <span className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(255,255,255,0.14),_transparent_65%)] opacity-70" />
-        <div className="relative flex items-center justify-between">
-          <div>
-            <p className="text-xs uppercase tracking-[0.3em] text-white/40">New transaction</p>
-            <h2 className="text-xl font-semibold text-white">Log manual entry</h2>
-          </div>
-          <button
-            type="button"
-            onClick={onClose}
-            className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-white/10 bg-white/8 text-white/70 transition hover:border-yellow-200/50 hover:text-white"
-          >
-            <span className="sr-only">Close</span>
-            <svg viewBox="0 0 24 24" className="h-4 w-4" stroke="currentColor" fill="none">
-              <path d="M6 6l12 12M6 18L18 6" strokeWidth="1.8" strokeLinecap="round" />
-            </svg>
-          </button>
+    <div className={styles.overlay} onClick={onClose}>
+      <div className={styles.modal} onClick={(event) => event.stopPropagation()}>
+        <div className={styles.header}>
+          <div className={styles.title}>Добавить транзакцию</div>
+          <Button variant="ghost" onClick={onClose}>✕</Button>
         </div>
-
-        <form
-          className="relative mt-6 space-y-5"
-          onSubmit={(event) => {
-            event.preventDefault()
-            onSubmit(form)
-          }}
-        >
-          <div className="grid grid-cols-2 gap-4">
-            <label className="space-y-2">
-              <span className="block text-sm text-white/60">Type</span>
-              <div className="grid grid-cols-2 gap-2">
-                {(['expense', 'income'] as const).map((type) => (
-                  <button
-                    type="button"
-                    key={type}
-                    className={`rounded-xl border px-3 py-2 text-sm font-medium capitalize transition ${
-                      form.type === type
-                        ? 'border-yellow-300 bg-yellow-200/20 text-yellow-50'
-                        : 'border-white/10 bg-white/0 text-white/60 hover:border-white/20 hover:text-white'
-                    }`}
-                    onClick={() => setForm((prev) => ({ ...prev, type }))}
-                  >
-                    {type}
-                  </button>
-                ))}
+        <form onSubmit={handleSubmit}>
+          <div className={styles.body}>
+            <div>
+              <span className={styles.label}>Тип</span>
+              <div className={styles.typeSwitch}>
+                <button
+                  type="button"
+                  className={`${styles.chip} ${type === "expense" ? styles.chipActive : ""}`}
+                  onClick={() => setType("expense")}
+                >
+                  Расход
+                </button>
+                <button
+                  type="button"
+                  className={`${styles.chip} ${type === "income" ? styles.chipActive : ""}`}
+                  onClick={() => setType("income")}
+                >
+                  Доход
+                </button>
               </div>
-            </label>
-
-            <label className="space-y-2">
-              <span className="block text-sm text-white/60">Category</span>
-              <select
-                value={form.category}
-                onChange={(event) =>
-                  setForm((prev) => ({ ...prev, category: event.target.value }))
-                }
-                className="w-full rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm text-white focus:border-yellow-200/40 focus:outline-none focus:ring-2 focus:ring-yellow-200/20"
-                required
-              >
-                <option value="general">General</option>
-                <option value="operations">Operations</option>
-                <option value="marketing">Marketing</option>
-                <option value="payroll">Payroll</option>
-                <option value="revenue">Revenue</option>
-              </select>
-            </label>
-          </div>
-
-          <label className="block space-y-2">
-            <span className="block text-sm text-white/60">Amount</span>
-            <input
-              type="number"
-              min="0"
-              step="0.01"
-              value={form.amount === 0 ? '' : form.amount}
-              onChange={(event) =>
-                setForm((prev) => ({ ...prev, amount: Number(event.target.value) }))
-              }
-              placeholder="Enter amount"
-              className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white placeholder:text-white/30 focus:border-yellow-200/40 focus:outline-none focus:ring-2 focus:ring-yellow-200/20"
-              required
-            />
-          </label>
-
-          <label className="block space-y-2">
-            <span className="block text-sm text-white/60">Description</span>
-            <input
-              type="text"
-              value={form.description}
-              onChange={(event) =>
-                setForm((prev) => ({ ...prev, description: event.target.value }))
-              }
-              placeholder="Add a short note"
-              className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white placeholder:text-white/30 focus:border-yellow-200/40 focus:outline-none focus:ring-2 focus:ring-yellow-200/20"
-              required
-            />
-          </label>
-
-          <label className="block space-y-2">
-            <span className="block text-sm text-white/60">Date</span>
-            <input
-              type="date"
-              value={form.date}
-              onChange={(event) =>
-                setForm((prev) => ({ ...prev, date: event.target.value }))
-              }
-              className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white focus:border-yellow-200/40 focus:outline-none focus:ring-2 focus:ring-yellow-200/20"
-              required
-            />
-          </label>
-
-            <div className="flex justify-end gap-3 pt-2">
-              <button
-                type="button"
-                onClick={onClose}
-                className="h-11 rounded-xl border border-white/15 px-4 text-sm font-medium text-white/70 transition hover:border-white/25 hover:bg-white/10"
-              >
-                Cancel
-              </button>
-              <button
-                type="submit"
-                className="h-11 rounded-xl bg-gradient-to-r from-yellow-200 via-yellow-300 to-yellow-500 px-6 text-sm font-semibold text-black shadow-[0_20px_60px_rgba(253,224,71,0.45)] transition hover:opacity-90"
-              >
-                Save transaction
-              </button>
             </div>
-          </form>
+
+            <div className={styles.row}>
+              <div>
+                <label className={styles.label} htmlFor="category">Категория</label>
+                <select
+                  id="category"
+                  className={styles.select}
+                  value={category}
+                  onChange={(event) => setCategory(event.target.value)}
+                  required
+                >
+                  <option value="" disabled>Выберите категорию</option>
+                  <option value="доход">Доход</option>
+                  <option value="питание">Питание</option>
+                  <option value="транспорт">Транспорт</option>
+                  <option value="покупки">Покупки</option>
+                  <option value="услуги">Услуги</option>
+                </select>
+              </div>
+              <div>
+                <label className={styles.label} htmlFor="amount">Сумма</label>
+                <Input
+                  id="amount"
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  placeholder="0.00"
+                  value={amount}
+                  onChange={(event) => setAmount(event.target.value)}
+                  required
+                />
+              </div>
+            </div>
+
+            <div>
+              <label className={styles.label} htmlFor="description">Описание</label>
+              <textarea
+                id="description"
+                className={styles.textarea}
+                placeholder="Добавьте комментарий"
+                value={description}
+                onChange={(event) => setDescription(event.target.value)}
+              />
+            </div>
+
+            <div>
+              <label className={styles.label} htmlFor="date">Дата</label>
+              <Input id="date" type="date" value={date} onChange={(event) => setDate(event.target.value)} required />
+            </div>
+          </div>
+          <div className={styles.actions}>
+            <Button type="button" variant="ghost" onClick={onClose}>Отмена</Button>
+            <Button type="submit">Сохранить</Button>
+          </div>
+        </form>
       </div>
     </div>
-  )
-}
+  );
+};
+
+export default AddTransactionModal;
+

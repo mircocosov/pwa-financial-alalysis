@@ -1,0 +1,100 @@
+@import '../styles/config.scss';
+
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: $overlay;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modal {
+  width: min(680px, 92vw);
+  background: $surface-alt;
+  border: 1px solid $primary-border;
+  border-radius: 14px;
+  box-shadow: 0 10px 30px $shadow-strong;
+  color: $text-primary;
+}
+
+.header {
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid $border;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.title {
+  font-size: 1.15rem;
+  font-weight: 600;
+  color: $primary;
+}
+
+.body {
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.9rem;
+}
+
+.actions {
+  display: flex;
+  gap: 0.75rem;
+  justify-content: flex-end;
+  padding: 0 1.25rem 1.25rem;
+}
+
+.label {
+  display: block;
+  font-size: 0.95rem;
+  color: $text-muted;
+  margin-bottom: 0.35rem;
+}
+
+.select,
+.textarea {
+  width: 100%;
+  border: 1.5px solid $primary-border;
+  border-radius: 8px;
+  background: $surface-alt;
+  color: $text-primary;
+  font-size: 1.05rem;
+  padding: 0.65em 0.9em;
+  outline: none;
+}
+
+.textarea {
+  min-height: 84px;
+  resize: vertical;
+}
+
+.typeSwitch {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.chip {
+  border: 1px solid $primary-soft;
+  color: $primary;
+  background: $surface-tint;
+  border-radius: 999px;
+  padding: 0.4rem 0.8rem;
+  cursor: pointer;
+  user-select: none;
+}
+
+.chipActive {
+  background: $primary;
+  color: $text-dark;
+  border-color: $primary;
+}
+

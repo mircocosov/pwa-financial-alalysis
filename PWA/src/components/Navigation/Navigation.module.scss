@@ -1,0 +1,72 @@
+@import '../../styles/config.scss';
+
+.nav {
+  width: 100%;
+  background: $surface-alt;
+  border-bottom: 1px solid $border;
+  box-shadow: 0 12px 28px $shadow-strong;
+  color: $text-primary;
+}
+
+.container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.5rem;
+  padding: 1.2rem 3rem;
+  margin: 0 auto;
+  max-width: 1280px;
+  flex-wrap: wrap;
+}
+
+.logo {
+  font-size: 1.3rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  color: $primary;
+}
+
+.menu {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  flex-wrap: wrap;
+}
+
+.menuItem {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.55rem 1rem;
+  border-radius: 999px;
+  text-decoration: none;
+  color: $text-subtle;
+  font-size: 0.98rem;
+  font-weight: 500;
+  transition: background 0.15s ease, color 0.15s ease, box-shadow 0.2s ease;
+
+  &:hover {
+    background: $primary-soft;
+    color: $primary;
+  }
+}
+
+.menuItemActive {
+  background: $primary;
+  color: $neutral;
+  box-shadow: 0 10px 20px $primary-soft;
+  pointer-events: none;
+}
+
+@media (max-width: 900px) {
+  .container {
+    padding: 1rem 1.75rem;
+  }
+}
+
+@media (max-width: 640px) {
+  .logo {
+    flex-basis: 100%;
+  }
+}
+

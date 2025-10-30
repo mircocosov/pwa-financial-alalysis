@@ -1,0 +1,19 @@
+@import '../../styles/config.scss';
+
+.input {
+  width: 100%;
+  border: 1.5px solid $primary-border;
+  border-radius: 8px;
+  background: $surface-alt;
+  color: $text-primary;
+  font-size: 1.09rem;
+  padding: 0.65em 1.15em;
+  outline: none;
+  transition: border-color 0.15s, background 0.15s;
+
+  &:focus {
+    border-color: $primary;
+    background: $surface;
+  }
+}
+
