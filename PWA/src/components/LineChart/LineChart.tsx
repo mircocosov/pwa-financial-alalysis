@@ -1,209 +1,294 @@
-import { useState } from 'react'
+import { useId, useMemo, useState } from 'react'
 import styles from './LineChart.module.scss'
 
-interface LineChartProps {
-  data: number[]
+export interface LineChartProps {
+  labels: string[]
+  values: number[]
+  target?: number
+  unit?: string
+  title?: string
 }
 
-interface Point {
+type Point = {
   x: number
   y: number
   value: number
   label: string
+  index: number
 }
 
-export default function LineChart({ data }: LineChartProps) {
-  const labels = [
-    'Январь',
-    'Февраль',
-    'Март',
-    'Апрель',
-    'Май',
-    'Июнь',
-    'Июль',
-    'Август',
-    'Сентябрь',
-    'Октябрь',
-    'Ноябрь',
-    'Декабрь',
-  ]
-  const [tooltip, setTooltip] = useState<Point | null>(null)
+type TooltipState = {
+  label: string
+  value: number
+  left: number
+  top: number
+}
+
+type HitArea = {
+  start: number
+  width: number
+  index: number
+}
+
+const VIEWBOX_WIDTH = 720
+const VIEWBOX_HEIGHT = 360
+const PADDING = {
+  top: 32,
+  right: 36,
+  bottom: 56,
+  left: 72,
+}
+const TICK_COUNT = 6
+
+const numberFormatter = new Intl.NumberFormat('ru-RU', {
+  maximumFractionDigits: 0,
+})
+
+const niceStep = (roughStep: number) => {
+  const exponent = Math.floor(Math.log10(roughStep))
+  const fraction = roughStep / 10 ** exponent
+
+  let niceFraction: number
+  if (fraction <= 1) niceFraction = 1
+  else if (fraction <= 2) niceFraction = 2
+  else if (fraction <= 5) niceFraction = 5
+  else niceFraction = 10
+
+  return niceFraction * 10 ** exponent
+}
+
+const formatValue = (value: number, unit?: string) => {
+  const formatted = numberFormatter.format(value)
+  return unit ? `${formatted} ${unit}` : formatted
+}
+
+export default function LineChart({
+  labels,
+  values,
+  target,
+  unit = '₽',
+  title = 'Revenue performance',
+}: LineChartProps) {
+  const [tooltip, setTooltip] = useState<TooltipState | null>(null)
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null)
+  const chartTitleId = useId()
 
-  const maxValue = Math.max(...data) * 1.1
+  const baseMax = Math.max(target ?? 0, ...values)
+  const step = niceStep(baseMax / Math.max(TICK_COUNT - 1, 1))
+  const maxValue = step * Math.max(TICK_COUNT - 1, 1)
 
-  const width = 600
-  const height = 300
-  const padding = 40
+  const innerWidth = VIEWBOX_WIDTH - PADDING.left - PADDING.right
+  const innerHeight = VIEWBOX_HEIGHT - PADDING.top - PADDING.bottom
 
-  const points: Point[] = data.map((value, index) => {
-    const x = padding + (index * (width - 2 * padding)) / (data.length - 1)
-    const y = height - padding - (value / maxValue) * (height - 2 * padding)
-    return { x, y, value, label: labels[index] }
-  })
+  const points = useMemo<Point[]>(() => {
+    if (values.length === 0) return []
+    const segments = Math.max(values.length - 1, 1)
 
-  const pathD = points
-    .map((p, i) => `${i === 0 ? 'M' : 'L'} ${p.x} ${p.y}`)
-    .join(' ')
+    return values.map((value, index) => {
+      const x = PADDING.left + (index / segments) * innerWidth
+      const y =
+        PADDING.top +
+        (1 - Math.min(value / maxValue, 1)) * innerHeight
 
-  // Рассчитываем области для каждого месяца
-  const monthAreas = points.map((p, i) => {
-    const prevX = i > 0 ? points[i - 1].x : padding
-    const nextX = i < points.length - 1 ? points[i + 1].x : width - padding
-    const areaWidth = (nextX - prevX) / 2
-    return {
-      x: p.x - areaWidth,
-      y: padding,
-      width: areaWidth * 2,
-      height: height - 2 * padding,
-      value: p.value,
-      label: p.label,
-      index: i,
-    }
-  })
+      return {
+        x,
+        y,
+        value,
+        label: labels[index] ?? `Point ${index + 1}`,
+        index,
+      }
+    })
+  }, [values, labels, innerWidth, innerHeight, maxValue])
 
-  const handleMonthHover = (index: number) => {
-    setHoveredIndex(index)
+  const linePath = useMemo(() => {
+    if (points.length === 0) return ''
+    return points
+      .map((point, index) => `${index === 0 ? 'M' : 'L'} ${point.x} ${point.y}`)
+      .join(' ')
+  }, [points])
+
+  const areaPath = useMemo(() => {
+    if (points.length < 2) return ''
+    const baselineY = VIEWBOX_HEIGHT - PADDING.bottom
+
+    const leading = `M ${points[0].x} ${baselineY}`
+    const middle = points.map((point) => `L ${point.x} ${point.y}`).join(' ')
+    const trailing = `L ${points[points.length - 1].x} ${baselineY} Z`
+
+    return `${leading} ${middle} ${trailing}`
+  }, [points])
+
+  const hitAreas = useMemo<HitArea[]>(() => {
+    if (points.length === 0) return []
+
+    return points.map((point, index) => {
+      const start =
+        index === 0
+          ? PADDING.left
+          : (point.x + points[index - 1].x) / 2
+      const end =
+        index === points.length - 1
+          ? VIEWBOX_WIDTH - PADDING.right
+          : (point.x + points[index + 1].x) / 2
+
+      return {
+        start,
+        width: Math.max(end - start, 6),
+        index,
+      }
+    })
+  }, [points])
+
+  const ticks = useMemo(
+    () => Array.from({ length: TICK_COUNT }, (_, idx) => idx * step),
+    [step],
+  )
+
+  const handleHover = (point: Point) => {
+    setHoveredIndex(point.index)
     setTooltip({
-      x: points[index].x,
-      y: points[index].y,
-      value: points[index].value,
-      label: points[index].label,
+      label: point.label,
+      value: point.value,
+      left: (point.x / VIEWBOX_WIDTH) * 100,
+      top: (point.y / VIEWBOX_HEIGHT) * 100,
     })
   }
 
-  const handleMonthLeave = () => {
+  const handleLeave = () => {
     setHoveredIndex(null)
     setTooltip(null)
   }
 
+  const hasTarget = typeof target === 'number'
+  const targetY = hasTarget
+    ? PADDING.top +
+      (1 - Math.min((target as number) / maxValue, 1)) * innerHeight
+    : null
+  const targetLabel = hasTarget
+    ? `Goal: ${formatValue(target as number, unit)}`
+    : ''
+
   return (
-    <div className={styles.container} style={{ width, height }}>
-      <svg className={styles.svg} width={width} height={height}>
-        {/* серые линии сетки */}
-        {[0, 0.25, 0.5, 0.75, 1].map((t, i) => {
-          const y = padding + t * (height - 2 * padding)
+    <div className={styles.container}>
+      <svg
+        className={styles.chart}
+        viewBox={`0 0 ${VIEWBOX_WIDTH} ${VIEWBOX_HEIGHT}`}
+        aria-labelledby={chartTitleId}
+        role="img"
+        preserveAspectRatio="xMidYMid meet"
+      >
+        <title id={chartTitleId}>{title}</title>
+
+        <defs>
+          <linearGradient id="chart-area-fill" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stopColor="rgba(249, 181, 76, 0.35)" />
+            <stop offset="100%" stopColor="rgba(249, 181, 76, 0.03)" />
+          </linearGradient>
+        </defs>
+
+        {ticks.map((tickValue) => {
+          const y =
+            PADDING.top +
+            (1 - tickValue / maxValue) * innerHeight
+
           return (
-            <line
-              key={`grid-${i}`}
-              x1={padding}
-              y1={y}
-              x2={width - padding}
-              y2={y}
-              className={styles.gridLine}
-            />
+            <g key={`tick-${tickValue}`}>
+              <line
+                x1={PADDING.left}
+                y1={y}
+                x2={VIEWBOX_WIDTH - PADDING.right}
+                y2={y}
+                className={styles.gridLine}
+              />
+              <text
+                x={PADDING.left - 12}
+                y={y + 4}
+                className={styles.yLabel}
+              >
+                {formatValue(tickValue, unit)}
+              </text>
+            </g>
           )
         })}
 
-        {/* желтые горизонтальные пунктирные линии */}
-        {[0, 0.25, 0.5, 0.75, 1].map((t, i) => {
-          const y = padding + t * (height - 2 * padding)
-          return (
-            <line
-              key={`yellow-horizontal-${i}`}
-              x1={padding}
-              y1={y}
-              x2={width - padding}
-              y2={y}
-              className={styles.yellowHorizontalLine}
-            />
-          )
-        })}
-
-        {/* желтые вертикальные пунктирные линии */}
-        {points.map((p, i) => (
+        {points.map((point) => (
           <line
-            key={`yellow-vertical-${i}`}
-            x1={p.x}
-            y1={padding}
-            x2={p.x}
-            y2={height - padding}
-            className={styles.yellowVerticalLine}
+            key={`vertical-${point.index}`}
+            x1={point.x}
+            y1={PADDING.top}
+            x2={point.x}
+            y2={VIEWBOX_HEIGHT - PADDING.bottom}
+            className={styles.verticalGuide}
+            opacity={hoveredIndex === point.index ? 0.45 : 0.18}
           />
         ))}
 
-        {/* линия графика */}
-        <path d={pathD} className={styles.chartPath} />
+        {areaPath && <path d={areaPath} className={styles.area} />}
+        {linePath && <path d={linePath} className={styles.line} />}
 
-        {/* белая вертикальная полоска при наведении */}
-        {hoveredIndex !== null && (
-          <line
-            x1={points[hoveredIndex].x}
-            y1={padding}
-            x2={points[hoveredIndex].x}
-            y2={height - padding}
-            className={styles.whiteLine}
-          />
+        {hasTarget && targetY !== null && (
+          <g className={styles.targetLine}>
+            <line
+              x1={PADDING.left}
+              y1={targetY}
+              x2={VIEWBOX_WIDTH - PADDING.right}
+              y2={targetY}
+            />
+            <text
+              x={VIEWBOX_WIDTH - PADDING.right + 8}
+              y={targetY + 4}
+            >
+              {targetLabel}
+            </text>
+          </g>
         )}
 
-        {/* прозрачные области для ховера по месяцам */}
-        {monthAreas.map((area, i) => (
-          <rect
-            key={`area-${i}`}
-            x={area.x}
-            y={area.y}
-            width={area.width}
-            height={area.height}
-            fill="transparent"
-            onMouseEnter={() => handleMonthHover(i)}
-            onMouseLeave={handleMonthLeave}
-            style={{ cursor: 'pointer' }}
-          />
-        ))}
-
-        {/* точки */}
-        {points.map((p, i) => (
-          <circle
-            key={`point-${i}`}
-            cx={p.x}
-            cy={p.y}
-            r={4}
-            className={styles.point}
-            onMouseEnter={() => handleMonthHover(i)}
-            onMouseLeave={handleMonthLeave}
-          />
-        ))}
-
-        {/* подписи по X */}
-        {points.map((p, i) => (
-          <text
-            key={`xlabel-${i}`}
-            x={p.x}
-            y={height - padding + 15}
-            className={styles.xLabel}
-          >
-            {p.label}
-          </text>
-        ))}
-
-        {/* подписи по Y */}
-        {[0, 0.25, 0.5, 0.75, 1].map((t, i) => {
-          const y = height - padding - t * (height - 2 * padding)
-          const val = Math.round(t * maxValue)
-          return (
+        {points.map((point) => (
+          <g key={`point-${point.index}`}>
+            <circle
+              cx={point.x}
+              cy={point.y}
+              r={hoveredIndex === point.index ? 6 : 4}
+              className={styles.point}
+              onMouseEnter={() => handleHover(point)}
+              onMouseLeave={handleLeave}
+            />
             <text
-              key={`ylabel-${i}`}
-              x={padding - 10}
-              y={y + 4}
-              className={styles.yLabel}
+              x={point.x}
+              y={VIEWBOX_HEIGHT - PADDING.bottom + 24}
+              className={styles.xLabel}
             >
-              {val.toLocaleString()} ₽
+              {point.label}
             </text>
-          )
-        })}
+          </g>
+        ))}
+
+        {hitAreas.map((area) => (
+          <rect
+            key={`hit-${area.index}`}
+            x={area.start}
+            y={PADDING.top}
+            width={area.width}
+            height={innerHeight}
+            fill="transparent"
+            onMouseEnter={() => handleHover(points[area.index])}
+            onMouseLeave={handleLeave}
+          />
+        ))}
       </svg>
 
-      {/* Tooltip */}
       {tooltip && (
         <div
           className={styles.tooltip}
           style={{
-            left: tooltip.x + 10,
-            top: tooltip.y - 30,
-            transform: 'translateX(-50%)',
+            left: `${tooltip.left}%`,
+            top: `${tooltip.top}%`,
           }}
         >
-          {tooltip.label}: {tooltip.value.toLocaleString()} ₽
+          <span className={styles.tooltipLabel}>{tooltip.label}</span>
+          <strong className={styles.tooltipValue}>
+            {formatValue(tooltip.value, unit)}
+          </strong>
         </div>
       )}
     </div>

@@ -1,0 +1,109 @@
+@import '@/assets/css/config.scss';
+
+.card {
+  @include card-surface;
+  padding: space(lg);
+  display: flex;
+  flex-direction: column;
+  gap: space(sm);
+  position: relative;
+  overflow: hidden;
+  transition: transform 220ms ease, box-shadow 220ms ease;
+
+  &::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 220ms ease;
+    background: linear-gradient(145deg, rgba(249, 181, 76, 0.16), rgba(35, 45, 70, 0.1));
+  }
+
+  &:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 28px 60px rgba(5, 10, 28, 0.45);
+
+    &::after {
+      opacity: 1;
+    }
+  }
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: space(sm);
+}
+
+.label {
+  @include typography-label;
+  color: theme-color(text-muted);
+  letter-spacing: 0.12em;
+}
+
+.trend {
+  display: inline-flex;
+  align-items: center;
+  gap: space(xs);
+  @include typography-financial-label;
+  color: theme-color(text-muted);
+  text-transform: none;
+
+  span {
+    width: 8px;
+    height: 8px;
+    border-radius: 999px;
+    display: inline-block;
+    background: theme-color(text-muted);
+  }
+
+  &[data-trend='up'] {
+    color: theme-color(positive);
+
+    span {
+      background: theme-color(positive);
+      box-shadow: 0 0 12px rgba(74, 222, 128, 0.5);
+    }
+  }
+
+  &[data-trend='down'] {
+    color: theme-color(negative);
+
+    span {
+      background: theme-color(negative);
+      box-shadow: 0 0 12px rgba(248, 113, 113, 0.45);
+    }
+  }
+}
+
+.value {
+  @include typography-heading-lg;
+  font-size: clamp(2rem, 1.7rem + 1vw, 2.6rem);
+  margin: 0;
+  color: theme-color(text-primary);
+}
+
+.delta {
+  margin: 0;
+  @include typography-body;
+  color: theme-color(text-secondary);
+
+  &[data-trend='up'] {
+    color: theme-color(positive);
+  }
+
+  &[data-trend='down'] {
+    color: theme-color(negative);
+  }
+}
+
+.description {
+  margin: 0;
+  margin-top: auto;
+  @include typography-body;
+  font-size: font-size(sm);
+  color: theme-color(text-muted);
+}
